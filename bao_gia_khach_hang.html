@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bảng Báo Giá Dịch Vụ - Khách Hàng</title>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --paper: #ffffff;
+      --surface-alt: #f8fafc;
+      --border: #e2e8f0;
+      --border-soft: #eef2f6;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --brand: #1e40af;
+      --brand-light: #2563eb;
+      --brand-soft: #eff6ff;
+      --emerald: #059669;
+      --emerald-soft: #ecfdf5;
+      --amber: #d97706;
+      --amber-soft: #fffbeb;
+      --rose: #e11d48;
+      --shadow-paper: 0 12px 36px rgba(15, 23, 42, 0.08);
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      font-variant-numeric: tabular-nums;
+      padding-bottom: 56px;
+    }
+
+    /* Top Control Toolbar (hidden when printing) */
+    .toolbar-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      margin-bottom: 24px;
+    }
+
+    .toolbar {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .mode-switch button {
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mode-switch button.active {
+      background: #ffffff;
+      color: var(--brand);
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text);
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--surface-alt);
+      border-color: #cbd5e1;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+    }
+
+    .btn-danger-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-muted);
+      padding: 4px 6px;
+    }
+
+    .btn-danger-ghost:hover {
+      color: var(--rose);
+      background: #fff1f2;
+      border-color: #fecdd3;
+    }
+
+    /* A4 Sheet Paper */
+    .paper {
+      max-width: 980px;
+      margin: 0 auto;
+      background: var(--paper);
+      border-radius: 16px;
+      box-shadow: var(--shadow-paper);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .paper-accent {
+      height: 7px;
+      background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%);
+    }
+
+    .paper-body {
+      padding: 36px 42px 42px;
+    }
+
+    @media (max-width: 720px) {
+      .paper-body { padding: 22px 18px 28px; }
+    }
+
+    /* Editable Text Styling */
+    [contenteditable="true"] {
+      border-radius: 5px;
+      transition: background 0.15s ease, box-shadow 0.15s ease;
+      outline: none;
+    }
+
+    body:not(.preview-mode) [contenteditable="true"]:hover {
+      background: #f1f5f9;
+    }
+
+    body:not(.preview-mode) [contenteditable="true"]:focus {
+      background: #eff6ff;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.22);
+    }
+
+    /* Header Section */
+    .quote-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding-bottom: 24px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .brand-block {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      max-width: 470px;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.04em;
+      flex-shrink: 0;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+    }
+
+    .brand-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-meta {
+      margin-top: 4px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .quote-title-block {
+      text-align: right;
+      min-width: 240px;
+    }
+
+    .quote-badge {
+      display: inline-block;
+      background: var(--brand-soft);
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+
+    .quote-heading {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--brand);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .quote-meta-grid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: end;
+      gap: 3px 14px;
+      font-size: 12.5px;
+    }
+
+    .quote-meta-grid .meta-k {
+      color: var(--text-muted);
+    }
+
+    .quote-meta-grid .meta-v {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Info Cards */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    @media (max-width: 680px) {
+      .info-grid { grid-template-columns: 1fr; }
+      .quote-title-block { text-align: left; }
+      .quote-meta-grid { justify-content: start; }
+    }
+
+    .info-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+
+    .info-card-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--brand);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 6px;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .info-row:last-child { margin-bottom: 0; }
+    .info-label { color: var(--text-muted); }
+    .info-val { font-weight: 600; color: var(--text); }
+
+    /* Table Section */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .section-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 720px;
+    }
+
+    thead th {
+      background: #1e293b;
+      color: #f8fafc;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 11px 12px;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    thead th.num, tbody td.num { text-align: right; }
+    thead th.center, tbody td.center { text-align: center; }
+
+    tbody tr.item-row {
+      border-bottom: 1px solid var(--border-soft);
+      transition: background 0.15s ease;
+    }
+
+    tbody tr.item-row:hover {
+      background: #fafcff;
+    }
+
+    tbody tr.item-row.unchecked {
+      opacity: 0.5;
+      background: #f8fafc;
+    }
+
+    tbody td {
+      padding: 12px;
+      vertical-align: top;
+    }
+
+    .item-check {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand);
+      cursor: pointer;
+      margin-top: 3px;
+    }
+
+    .item-title-line {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .item-name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 13.5px;
+    }
+
+    .cat-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+
+    .opt-tag {
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .item-desc {
+      margin-top: 4px;
+      font-size: 12.2px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .cell-input {
+      width: 100%;
+      padding: 5px 7px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .cell-input.num { text-align: right; font-weight: 600; }
+    .cell-input.center { text-align: center; }
+
+    body:not(.preview-mode) .cell-input:hover {
+      border-color: var(--border);
+      background: #ffffff;
+    }
+
+    body:not(.preview-mode) .cell-input:focus {
+      border-color: var(--brand-light);
+      background: #ffffff;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+    }
+
+    .line-total {
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+      padding-top: 5px;
+      display: inline-block;
+    }
+
+    .add-item-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    /* Summary Grid (Visual Allocation + Totals Box) */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+      gap: 22px;
+      margin-bottom: 26px;
+      align-items: start;
+    }
+
+    @media (max-width: 760px) {
+      .summary-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Allocation Card */
+    .alloc-card {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+
+    .alloc-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .stacked-bar {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      gap: 2px;
+      background: #e2e8f0;
+      margin-bottom: 12px;
+    }
+
+    .stacked-seg {
+      height: 100%;
+      transition: width 0.25s ease;
+    }
+
+    .alloc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+
+    .alloc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+    }
+
+    .alloc-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .alloc-right {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* Payment Milestones */
+    .milestones {
+      border-top: 1px dashed var(--border);
+      padding-top: 13px;
+    }
+
+    .milestone-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+    }
+
+    .milestone-row:last-child { margin-bottom: 0; }
+    .milestone-label { color: var(--text-secondary); }
+    .milestone-label strong { color: var(--text); }
+    .milestone-val { font-weight: 700; color: var(--brand); white-space: nowrap; }
+
+    /* Totals Box */
+    .totals-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      background: #ffffff;
+    }
+
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 7px 0;
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+
+    .total-row strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .total-section-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--brand);
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    .total-divider {
+      border: none;
+      border-top: 1px dashed var(--border);
+      margin: 8px 0;
+    }
+
+    .table-foot-row td {
+      background: #f8fafc;
+      font-weight: 800;
+      color: var(--text);
+      border-top: 1.5px solid var(--border);
+      padding: 11px 12px;
+    }
+
+    .media-thead th {
+      background: #0f4c81;
+    }
+
+    .share-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .inline-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .small-input, .small-select {
+      padding: 3px 7px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-alt);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+    }
+
+    .small-input { width: 58px; text-align: right; }
+
+    .grand-total-box {
+      margin-top: 10px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .grand-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.92;
+    }
+
+    .grand-value {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .amount-words {
+      margin-top: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: var(--brand-soft);
+      color: #1e3a8a;
+      font-size: 12.2px;
+      line-height: 1.45;
+    }
+
+    /* Bank & Terms */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 680px) {
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    .terms-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 15px 18px;
+      background: #ffffff;
+    }
+
+    .terms-list {
+      padding-left: 18px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .terms-list li { margin-bottom: 4px; }
+
+    /* Signature Block */
+    .signature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 28px;
+      padding-top: 18px;
+      border-top: 1.5px solid var(--border);
+    }
+
+    .sig-col {
+      text-align: center;
+    }
+
+    .sig-role {
+      font-size: 12.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .sig-note {
+      font-size: 11.5px;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .sig-space {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sig-stamp-hint {
+      font-size: 11px;
+      color: #cbd5e1;
+      border: 1px dashed #e2e8f0;
+      padding: 6px 16px;
+      border-radius: 999px;
+    }
+
+    .sig-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Preview Mode & Print Mode Rules */
+    body.preview-mode .edit-only { display: none !important; }
+    body.preview-mode tbody tr.item-row.unchecked { display: none !important; }
+    body.preview-mode .cell-input {
+      border-color: transparent !important;
+      background: transparent !important;
+      pointer-events: none;
+    }
+    body.preview-mode .small-input,
+    body.preview-mode .small-select {
+      border-color: transparent;
+      background: transparent;
+      appearance: none;
+      pointer-events: none;
+      padding: 0;
+    }
+
+    @media print {
+      @page { size: A4; margin: 12mm; }
+      body { background: #ffffff; padding: 0; }
+      .toolbar-wrap, .edit-only { display: none !important; }
+      .paper {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        max-width: 100%;
+      }
+      .paper-body { padding: 14px 4px 0; }
+      tbody tr.item-row.unchecked { display: none !important; }
+      .cell-input, .small-input, .small-select {
+        border: none !important;
+        background: transparent !important;
+        appearance: none;
+        padding: 0;
+      }
+      .info-card, .alloc-card, .totals-box, .terms-box, .signature-grid {
+        break-inside: avoid;
+      }
+      .grand-total-box, thead th, .paper-accent, .stacked-seg, .brand-logo {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .sig-stamp-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sticky Action Bar -->
+  <div class="toolbar-wrap">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <span class="toolbar-title">Trình tạo Báo giá Khách hàng</span>
+        <div class="mode-switch" id="modeSwitch">
+          <button class="active" data-mode="edit">Chỉnh sửa</button>
+          <button data-mode="preview">Xem bản gửi khách</button>
+        </div>
+      </div>
+      <div class="toolbar-actions">
+        <input type="file" id="csvImportInput" accept=".csv,text/csv" hidden />
+        <button class="btn edit-only" id="importCsvBtn" title="Nhập danh sách hạng mục từ file CSV">Nhập CSV</button>
+        <button class="btn" id="exportCsvBtn" title="Xuất danh sách hạng mục ra file CSV">Xuất CSV</button>
+        <button class="btn edit-only" id="resetBtn" title="Khôi phục dữ liệu mẫu ban đầu">Đặt lại mẫu</button>
+        <button class="btn btn-primary" onclick="window.print()" title="In hoặc lưu báo giá thành file PDF chuẩn A4">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          In / Xuất PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quotation Document -->
+  <main class="paper">
+    <div class="paper-accent"></div>
+    <div class="paper-body">
+      <!-- Header -->
+      <header class="quote-header">
+        <div class="brand-block">
+          <div class="brand-logo" contenteditable="true">ND</div>
+          <div>
+            <div class="brand-name" contenteditable="true">CÔNG TY TNHH GIẢI PHÁP NOVA DIGITAL</div>
+            <div class="brand-meta" contenteditable="true">
+              MST: 0316894521 • Tầng 12, Tòa nhà Viettel, Q.10, TP. Hồ Chí Minh<br />
+              Hotline: 0909 886 246 • Email: hello@novadigital.vn • Website: novadigital.vn
+            </div>
+          </div>
+        </div>
+
+        <div class="quote-title-block">
+          <div class="quote-badge">Quotation / Proposal</div>
+          <h1 class="quote-heading">BẢNG BÁO GIÁ DỊCH VỤ</h1>
+          <div class="quote-meta-grid">
+            <span class="meta-k">Số báo giá:</span>
+            <span class="meta-v" contenteditable="true">BG-2026-1119</span>
+            <span class="meta-k">Ngày lập:</span>
+            <span class="meta-v" contenteditable="true">19/11/2026</span>
+            <span class="meta-k">Hiệu lực đến:</span>
+            <span class="meta-v" contenteditable="true">04/12/2026 (15 ngày)</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Client & Project Info -->
+      <section class="info-grid">
+        <div class="info-card">
+          <div class="info-card-title">Kính gửi Khách hàng</div>
+          <div class="info-row">
+            <span class="info-label">Đơn vị:</span>
+            <span class="info-val" contenteditable="true">Công ty Cổ phần Thời trang AURA Việt Nam</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Người liên hệ:</span>
+            <span class="info-val" contenteditable="true">Chị Trần Thanh Thảo — Marketing Manager</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Liên hệ:</span>
+            <span class="info-val" contenteditable="true">0912 345 678 • thao.tran@aurafashion.vn</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Địa chỉ:</span>
+            <span class="info-val" contenteditable="true">245 Nguyễn Thị Minh Khai, Q.1, TP. Hồ Chí Minh</span>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <div class="info-card-title">Thông tin Dự án & Tư vấn</div>
+          <div class="info-row">
+            <span class="info-label">Tên dự án:</span>
+            <span class="info-val" contenteditable="true">Chiến dịch Ra mắt BST Thu Đông & Flash Sale</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Thời gian:</span>
+            <span class="info-val" contenteditable="true">30 ngày triển khai (Dự kiến 12/2026)</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phụ trách:</span>
+            <span class="info-val" contenteditable="true">Nguyễn Minh Anh — Account Director</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Đơn vị tiền tệ:</span>
+            <span class="info-val">Việt Nam Đồng (VNĐ)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Part I: Service Items Table -->
+      <section>
+        <div class="section-head">
+          <h2 class="section-title">I. Phí Dịch vụ Triển khai (Agency Service Fee)</h2>
+          <span class="section-hint edit-only">Bấm trực tiếp vào nội dung, số lượng hoặc đơn giá để chỉnh sửa • Tích chọn/bỏ chọn hạng mục tùy chọn</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="center edit-only" style="width:42px">Chọn</th>
+                <th class="center" style="width:48px">STT</th>
+                <th>Hạng mục & Mô tả công việc</th>
+                <th class="center" style="width:86px">Đơn vị</th>
+                <th class="num" style="width:76px">SL</th>
+                <th class="num" style="width:132px">Đơn giá (₫)</th>
+                <th class="num" style="width:142px">Thành tiền (₫)</th>
+                <th class="center edit-only" style="width:44px"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+            <tfoot>
+              <tr class="table-foot-row">
+                <td class="edit-only"></td>
+                <td colspan="5" style="text-align:right; color:var(--text-secondary)">Tạm tính Phần I (Phí Dịch vụ Triển khai):</td>
+                <td class="num" id="serviceFootTotal" style="color:var(--brand)">0 ₫</td>
+                <td class="edit-only"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="add-item-bar edit-only">
+          <button class="btn" id="addItemBtn">+ Thêm hạng mục dịch vụ</button>
+          <span class="section-hint" id="selectedCountHint"></span>
+        </div>
+      </section>
+
+      <!-- Part II: Media Budget Table -->
+      <section style="margin-top: 6px;">
+        <div class="section-head">
+          <h2 class="section-title">II. Ngân sách Media Nền tảng (Facebook, Google, TikTok, Zalo)</h2>
+          <span class="section-hint edit-only">Dự toán chi phí quảng cáo trả cho các nền tảng • Chỉnh số ngày hoặc ngân sách/ngày để tự động tính lại</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead class="media-thead">
+              <tr>
+                <th class="center edit-only" style="width:42px">Chọn</th>
+                <th class="center" style="width:48px">STT</th>
+                <th>Nền tảng & Mục tiêu phân bổ ngân sách</th>
+                <th class="num" style="width:82px">Số ngày</th>
+                <th class="num" style="width:134px">Ngân sách/ngày (₫)</th>
+                <th class="center" style="width:84px">Tỷ trọng</th>
+                <th class="num" style="width:142px">Tổng ngân sách (₫)</th>
+                <th class="center edit-only" style="width:44px"></th>
+              </tr>
+            </thead>
+            <tbody id="mediaBody"></tbody>
+            <tfoot>
+              <tr class="table-foot-row">
+                <td class="edit-only"></td>
+                <td colspan="5" style="text-align:right; color:var(--text-secondary)">Tổng Phần II (Dự toán Ngân sách Media):</td>
+                <td class="num" id="mediaFootTotal" style="color:#0f4c81">0 ₫</td>
+                <td class="edit-only"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="add-item-bar edit-only">
+          <button class="btn" id="addMediaBtn">+ Thêm kênh Media</button>
+          <span class="section-hint" id="mediaCountHint"></span>
+        </div>
+      </section>
+
+      <!-- Visual Budget Breakdown & Financial Summary -->
+      <section class="summary-grid">
+        <div class="alloc-card">
+          <div class="alloc-title">Cơ cấu Tổng Ngân sách (Phần I + Phần II)</div>
+          <div class="stacked-bar" id="stackedBar"></div>
+          <div class="alloc-list" id="allocList"></div>
+
+          <div class="milestones">
+            <div class="alloc-title" style="margin-bottom:8px">Lộ trình Thanh toán dự kiến</div>
+            <div class="milestone-row">
+              <span class="milestone-label"><strong>Đợt 1 (50%)</strong> — Ký hợp đồng & nạp Media giai đoạn đầu</span>
+              <span class="milestone-val" id="ms1Val">0 ₫</span>
+            </div>
+            <div class="milestone-row">
+              <span class="milestone-label"><strong>Đợt 2 (30%)</strong> — Duyệt Creative & đẩy mạnh Flash Sale</span>
+              <span class="milestone-val" id="ms2Val">0 ₫</span>
+            </div>
+            <div class="milestone-row">
+              <span class="milestone-label"><strong>Đợt 3 (20%)</strong> — Nghiệm thu, đối soát Media & báo cáo cuối</span>
+              <span class="milestone-val" id="ms3Val">0 ₫</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="totals-box">
+          <div class="total-section-label">Phần I — Phí Dịch vụ Triển khai</div>
+          <div class="total-row">
+            <span>Tạm tính Phí dịch vụ</span>
+            <strong id="subtotalVal">0 ₫</strong>
+          </div>
+          <div class="total-row">
+            <span class="inline-control">
+              Chiết khấu ưu đãi Phí dịch vụ
+              <input type="number" id="discountInput" class="small-input" min="0" max="100" step="0.5" value="5" />%
+            </span>
+            <strong id="discountVal" style="color:var(--emerald)">- 0 ₫</strong>
+          </div>
+          <div class="total-row">
+            <span class="inline-control">
+              Thuế GTGT (VAT) Phần I
+              <select id="vatSelect" class="small-select">
+                <option value="0">0%</option>
+                <option value="8" selected>8%</option>
+                <option value="10">10%</option>
+              </select>
+            </span>
+            <strong id="vatVal">+ 0 ₫</strong>
+          </div>
+          <div class="total-row" style="color:var(--text); font-weight:700">
+            <span>Thành tiền Phần I (sau VAT)</span>
+            <strong id="serviceTotalVal" style="color:var(--brand)">0 ₫</strong>
+          </div>
+
+          <hr class="total-divider" />
+
+          <div class="total-section-label">Phần II — Ngân sách Media Nền tảng</div>
+          <div class="total-row">
+            <span id="mediaSubtotalLabel">Dự toán Ngân sách Media</span>
+            <strong id="mediaSubtotalVal">0 ₫</strong>
+          </div>
+          <div class="total-row">
+            <span class="inline-control">
+              Thuế / Phí nền tảng (nếu có)
+              <select id="mediaTaxSelect" class="small-select">
+                <option value="0" selected>0%</option>
+                <option value="5">5%</option>
+                <option value="8">8%</option>
+                <option value="10">10%</option>
+              </select>
+            </span>
+            <strong id="mediaTaxVal">0 ₫</strong>
+          </div>
+          <div class="total-row" style="color:var(--text); font-weight:700">
+            <span>Thành tiền Phần II (Ngân sách Media)</span>
+            <strong id="mediaTotalVal" style="color:#0f4c81">0 ₫</strong>
+          </div>
+
+          <div class="grand-total-box">
+            <span class="grand-label">Tổng cộng báo giá (I + II)</span>
+            <span class="grand-value" id="grandTotalVal">0 ₫</span>
+          </div>
+
+          <div class="amount-words">
+            <strong>Bằng chữ:</strong> <span id="amountWords">Không đồng.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bank Details & Terms -->
+      <section class="bottom-grid">
+        <div class="terms-box">
+          <div class="info-card-title">Điều khoản & Phạm vi cam kết</div>
+          <ul class="terms-list" contenteditable="true">
+            <li>Báo giá đã bao gồm dự toán Ngân sách Media (Phần II) cho các nền tảng Facebook, Google, TikTok, Zalo; toàn bộ chi tiêu Media thực tế được đối soát minh bạch theo báo cáo/hóa đơn tài khoản quảng cáo vào cuối chiến dịch.</li>
+            <li>Mỗi hạng mục sáng tạo (Banner, Video, Landing Page) bao gồm tối đa 02 vòng chỉnh sửa theo phản hồi tổng hợp.</li>
+            <li>Tiến độ triển khai được tính kể từ ngày nhận đủ thông tin sản phẩm (Brief) và khoản thanh toán Đợt 1.</li>
+            <li>Hai bên cam kết bảo mật toàn bộ số liệu kinh doanh, tài khoản quảng cáo và dữ liệu khách hàng (NDA).</li>
+          </ul>
+        </div>
+
+        <div class="terms-box">
+          <div class="info-card-title">Thông tin Chuyển khoản Thanh toán</div>
+          <div class="info-row">
+            <span class="info-label">Ngân hàng:</span>
+            <span class="info-val" contenteditable="true">Vietcombank — Chi nhánh TP. Hồ Chí Minh</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Số tài khoản:</span>
+            <span class="info-val" contenteditable="true">0071 0012 8899 68</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Chủ tài khoản:</span>
+            <span class="info-val" contenteditable="true">CÔNG TY TNHH GIẢI PHÁP NOVA DIGITAL</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Nội dung CK:</span>
+            <span class="info-val" contenteditable="true">Thanh toan BG-2026-1119 - AURA VN</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Signatures -->
+      <section class="signature-grid">
+        <div class="sig-col">
+          <div class="sig-role">Xác nhận của Khách hàng</div>
+          <div class="sig-note">(Ký, ghi rõ họ tên & đóng dấu)</div>
+          <div class="sig-space"><span class="sig-stamp-hint">Khu vực ký xác nhận</span></div>
+          <div class="sig-name" contenteditable="true">Trần Thanh Thảo</div>
+        </div>
+        <div class="sig-col">
+          <div class="sig-role">Đại diện Đơn vị Cung cấp</div>
+          <div class="sig-note">(Ký, ghi rõ họ tên & đóng dấu)</div>
+          <div class="sig-space"><span class="sig-stamp-hint">Khu vực ký & đóng dấu</span></div>
+          <div class="sig-name" contenteditable="true">Nguyễn Minh Anh</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const CATEGORY_META = {
+      "Chiến lược & Setup": { color: "#2563eb", bg: "#eff6ff" },
+      "Sản xuất Creative": { color: "#db2777", bg: "#fdf2f8" },
+      "Vận hành Quảng cáo": { color: "#059669", bg: "#ecfdf5" },
+      "Tùy chọn Mở rộng": { color: "#d97706", bg: "#fffbeb" },
+      "Ngân sách Media": { color: "#0f4c81", bg: "#e0f2fe" }
+    };
+
+    const PLATFORM_META = {
+      "Facebook Ads": { color: "#2563eb", bg: "#eff6ff" },
+      "Google Search": { color: "#059669", bg: "#ecfdf5" },
+      "TikTok Ads": { color: "#e11d48", bg: "#fff1f2" },
+      "Zalo Ads": { color: "#0284c7", bg: "#e0f2fe" }
+    };
+
+    const DEFAULT_MEDIA_ITEMS = [
+      {
+        id: 101,
+        selected: true,
+        platform: "Facebook Ads",
+        name: "Facebook Ads — Ra mắt BST Thu Đông & Retargeting Giỏ hàng",
+        desc: "Phân bổ 65% cho chiến dịch Prospecting (Miền Nam) & 35% cho Retargeting giỏ hàng bỏ quên (Toàn quốc).",
+        days: 30,
+        dailyBudget: 3500000
+      },
+      {
+        id: 102,
+        selected: true,
+        platform: "Google Search",
+        name: "Google Search — Tìm kiếm Thương hiệu & Sản phẩm chủ lực",
+        desc: "Đánh vào nhóm từ khóa có ý định mua hàng cao (High-intent) và bảo vệ từ khóa thương hiệu trên toàn quốc.",
+        days: 30,
+        dailyBudget: 2000000
+      },
+      {
+        id: 103,
+        selected: true,
+        platform: "TikTok Ads",
+        name: "TikTok Ads — Video ngắn Viral & Đẩy mạnh Flash Sale",
+        desc: "Quảng cáo In-Feed & Spark Ads kéo lượng tiếp cận mới (Miền Bắc) và tăng ngân sách cao điểm dịp Flash Sale.",
+        days: 30,
+        dailyBudget: 2300000
+      },
+      {
+        id: 104,
+        selected: true,
+        platform: "Zalo Ads",
+        name: "Zalo Ads — Ưu đãi Thành viên Zalo OA & Remarketing",
+        desc: "Phủ tệp khách hàng trung niên/công sở khu vực Miền Nam, tăng lượng quan tâm OA và chuyển đổi mã ưu đãi.",
+        days: 30,
+        dailyBudget: 700000
+      }
+    ];
+
+    const DEFAULT_ITEMS = [
+      {
+        id: 1,
+        selected: true,
+        optional: false,
+        category: "Chiến lược & Setup",
+        name: "Chiến lược Truyền thông & Media Plan tổng thể",
+        desc: "Phân tích chân dung khách hàng, định vị thông điệp BST Thu Đông, phân bổ ngân sách và KPI chi tiết theo từng kênh.",
+        unit: "Gói",
+        qty: 1,
+        price: 12000000
+      },
+      {
+        id: 2,
+        selected: true,
+        optional: false,
+        category: "Chiến lược & Setup",
+        name: "Thiết lập Tracking & Đo lường Chuyển đổi",
+        desc: "Cài đặt Google Analytics 4, Meta Pixel, TikTok Pixel, Conversion API và kiểm thử phễu sự kiện mua hàng.",
+        unit: "Hệ thống",
+        qty: 1,
+        price: 6500000
+      },
+      {
+        id: 3,
+        selected: true,
+        optional: false,
+        category: "Sản xuất Creative",
+        name: "Thiết kế bộ ấn phẩm hình ảnh quảng cáo đa nền tảng",
+        desc: "Thiết kế Banner tĩnh, Carousel sản phẩm và ảnh Flash Sale chuẩn kích thước Facebook, Zalo và Google Display.",
+        unit: "Bộ",
+        qty: 15,
+        price: 850000
+      },
+      {
+        id: 4,
+        selected: true,
+        optional: false,
+        category: "Sản xuất Creative",
+        name: "Sản xuất Video ngắn TikTok / Facebook Reels",
+        desc: "Lên kịch bản hook 3 giây, quay dựng studio, hậu kỳ motion text và tối ưu tỷ lệ giữ chân người xem.",
+        unit: "Video",
+        qty: 6,
+        price: 4500000
+      },
+      {
+        id: 5,
+        selected: true,
+        optional: false,
+        category: "Sản xuất Creative",
+        name: "Thiết kế & Lập trình Landing Page Flash Sale",
+        desc: "Giao diện chuẩn chuyển đổi cao (CRO), tương thích mobile, tích hợp form đặt hàng và đồng bộ CRM.",
+        unit: "Trang",
+        qty: 1,
+        price: 9500000
+      },
+      {
+        id: 6,
+        selected: true,
+        optional: false,
+        category: "Vận hành Quảng cáo",
+        name: "Quản trị & Tối ưu Quảng cáo Đa kênh (30 ngày)",
+        desc: "Vận hành Facebook Ads, Google Search, TikTok Ads, A/B testing mẫu quảng cáo và tối ưu ROAS/CPA hằng ngày.",
+        unit: "Tháng",
+        qty: 1,
+        price: 18000000
+      },
+      {
+        id: 7,
+        selected: true,
+        optional: false,
+        category: "Vận hành Quảng cáo",
+        name: "Triển khai Email Marketing & Zalo OA Retargeting",
+        desc: "Xây dựng 4 luồng tự động nhắc giỏ hàng bỏ quên, chăm sóc khách hàng thân thiết và thông báo ưu đãi Flash Sale.",
+        unit: "Gói",
+        qty: 1,
+        price: 7000000
+      },
+      {
+        id: 8,
+        selected: true,
+        optional: true,
+        category: "Tùy chọn Mở rộng",
+        name: "Hệ thống Báo cáo Dashboard Tương tác & Tổng kết",
+        desc: "Bàn giao báo cáo trực quan hóa dữ liệu theo ngày, phân tích phễu chuyển đổi và khuyến nghị mở rộng quy mô.",
+        unit: "Gói",
+        qty: 1,
+        price: 5000000
+      },
+      {
+        id: 9,
+        selected: false,
+        optional: true,
+        category: "Tùy chọn Mở rộng",
+        name: "Gói Booking Micro-KOC Review BST Thu Đông",
+        desc: "Tuyển chọn, gửi sản phẩm, duyệt nội dung và theo dõi hiệu quả 5 KOC thời trang (10K–50K followers/kênh).",
+        unit: "KOC",
+        qty: 5,
+        price: 3200000
+      }
+    ];
+
+    let items = structuredClone(DEFAULT_ITEMS);
+    let mediaItems = structuredClone(DEFAULT_MEDIA_ITEMS);
+    let nextId = 200;
+
+    const $ = (id) => document.getElementById(id);
+
+    function fmtMoney(n) {
+      return Math.round(n || 0).toLocaleString("vi-VN") + " ₫";
+    }
+
+    function escapeHtml(str) {
+      return String(str ?? "").replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[m]));
+    }
+
+    function getCatStyle(cat) {
+      return CATEGORY_META[cat] || { color: "#475569", bg: "#f1f5f9" };
+    }
+
+    function getPlatformStyle(plat) {
+      return PLATFORM_META[plat] || { color: "#0f4c81", bg: "#e0f2fe" };
+    }
+
+    // Convert integer VND amount to natural Vietnamese words
+    function numberToVietnameseWords(amount) {
+      const n = Math.round(amount || 0);
+      if (n === 0) return "Không đồng.";
+      const digits = ["không", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín"];
+      const scales = ["", " nghìn", " triệu", " tỷ", " nghìn tỷ"];
+
+      function readThreeDigits(num, full) {
+        const h = Math.floor(num / 100);
+        const t = Math.floor((num % 100) / 10);
+        const u = num % 10;
+        let out = "";
+
+        if (full || h > 0) {
+          out += digits[h] + " trăm";
+          if (t === 0 && u > 0) out += " linh";
+        }
+        if (t > 1) {
+          out += (out ? " " : "") + digits[t] + " mươi";
+          if (u === 1) out += " mốt";
+          else if (u === 4) out += " tư";
+          else if (u === 5) out += " lăm";
+          else if (u > 0) out += " " + digits[u];
+        } else if (t === 1) {
+          out += (out ? " " : "") + "mười";
+          if (u === 5) out += " lăm";
+          else if (u > 0) out += " " + digits[u];
+        } else if (u > 0) {
+          out += (out ? " " : "") + digits[u];
+        }
+        return out;
+      }
+
+      const groups = [];
+      let tmp = Math.abs(n);
+      while (tmp > 0) {
+        groups.push(tmp % 1000);
+        tmp = Math.floor(tmp / 1000);
+      }
+
+      const parts = [];
+      for (let i = groups.length - 1; i >= 0; i--) {
+        const g = groups[i];
+        if (g > 0) {
+          const full = i < groups.length - 1;
+          parts.push(readThreeDigits(g, full) + (scales[i] || ""));
+        }
+      }
+
+      const sentence = (n < 0 ? "Âm " : "") + parts.join(" ") + " đồng chẵn.";
+      return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+    }
+
+    function renderItems() {
+      const tbody = $("itemsBody");
+      let visibleIndex = 0;
+
+      tbody.innerHTML = items.map((it) => {
+        if (it.selected) visibleIndex++;
+        const stt = it.selected ? visibleIndex : "—";
+        const lineTotal = (Number(it.qty) || 0) * (Number(it.price) || 0);
+        const catStyle = getCatStyle(it.category);
+
+        return `
+          <tr class="item-row ${it.selected ? "" : "unchecked"}" data-id="${it.id}">
+            <td class="center edit-only">
+              <input type="checkbox" class="item-check" data-action="toggle" ${it.selected ? "checked" : ""} title="Chọn/bỏ chọn hạng mục này" />
+            </td>
+            <td class="center" style="font-weight:700; color:var(--text-muted); padding-top:15px">${stt}</td>
+            <td>
+              <div class="item-title-line">
+                <span class="item-name" contenteditable="true" data-field="name">${escapeHtml(it.name)}</span>
+                <span class="cat-tag" style="color:${catStyle.color}; background:${catStyle.bg}">${escapeHtml(it.category)}</span>
+                ${it.optional ? `<span class="opt-tag">Tùy chọn</span>` : ""}
+              </div>
+              <div class="item-desc" contenteditable="true" data-field="desc">${escapeHtml(it.desc)}</div>
+            </td>
+            <td class="center">
+              <input type="text" class="cell-input center" data-field="unit" value="${escapeHtml(it.unit)}" />
+            </td>
+            <td class="num">
+              <input type="number" class="cell-input num" data-field="qty" min="0" step="1" value="${it.qty}" />
+            </td>
+            <td class="num">
+              <input type="number" class="cell-input num" data-field="price" min="0" step="100000" value="${it.price}" />
+            </td>
+            <td class="num">
+              <span class="line-total">${fmtMoney(lineTotal)}</span>
+            </td>
+            <td class="center edit-only">
+              <button class="btn btn-danger-ghost" data-action="delete" title="Xóa hạng mục">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      recalcTotals();
+    }
+
+    function renderMediaItems() {
+      const tbody = $("mediaBody");
+      const totalSelectedMedia = mediaItems
+        .filter((m) => m.selected)
+        .reduce((sum, m) => sum + (Number(m.days) || 0) * (Number(m.dailyBudget) || 0), 0);
+      let visibleIndex = 0;
+
+      tbody.innerHTML = mediaItems.map((m) => {
+        if (m.selected) visibleIndex++;
+        const stt = m.selected ? visibleIndex : "—";
+        const lineTotal = (Number(m.days) || 0) * (Number(m.dailyBudget) || 0);
+        const share = m.selected && totalSelectedMedia > 0 ? ((lineTotal / totalSelectedMedia) * 100).toFixed(1).replace(".", ",") + "%" : "0%";
+        const pStyle = getPlatformStyle(m.platform);
+
+        return `
+          <tr class="item-row ${m.selected ? "" : "unchecked"}" data-media-id="${m.id}">
+            <td class="center edit-only">
+              <input type="checkbox" class="item-check" data-action="toggle" ${m.selected ? "checked" : ""} title="Chọn/bỏ chọn kênh Media này" />
+            </td>
+            <td class="center" style="font-weight:700; color:var(--text-muted); padding-top:15px">${stt}</td>
+            <td>
+              <div class="item-title-line">
+                <span class="item-name" contenteditable="true" data-field="name">${escapeHtml(m.name)}</span>
+                <span class="cat-tag" style="color:${pStyle.color}; background:${pStyle.bg}">${escapeHtml(m.platform)}</span>
+              </div>
+              <div class="item-desc" contenteditable="true" data-field="desc">${escapeHtml(m.desc)}</div>
+            </td>
+            <td class="num">
+              <input type="number" class="cell-input num" data-field="days" min="0" step="1" value="${m.days}" />
+            </td>
+            <td class="num">
+              <input type="number" class="cell-input num" data-field="dailyBudget" min="0" step="100000" value="${m.dailyBudget}" />
+            </td>
+            <td class="center" style="padding-top:14px">
+              <span class="share-pill" data-share-id="${m.id}">${share}</span>
+            </td>
+            <td class="num">
+              <span class="line-total">${fmtMoney(lineTotal)}</span>
+            </td>
+            <td class="center edit-only">
+              <button class="btn btn-danger-ghost" data-action="delete" title="Xóa kênh Media">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      recalcTotals();
+    }
+
+    function updateMediaShares(totalMedia) {
+      mediaItems.forEach((m) => {
+        const pill = document.querySelector(`[data-share-id="${m.id}"]`);
+        if (!pill) return;
+        const val = (Number(m.days) || 0) * (Number(m.dailyBudget) || 0);
+        pill.textContent = m.selected && totalMedia > 0 ? ((val / totalMedia) * 100).toFixed(1).replace(".", ",") + "%" : "0%";
+      });
+    }
+
+    function recalcTotals() {
+      // Part I: Agency Services
+      const selectedItems = items.filter((i) => i.selected);
+      const serviceSubtotal = selectedItems.reduce((sum, i) => sum + (Number(i.qty) || 0) * (Number(i.price) || 0), 0);
+
+      const discountPct = Math.max(0, Math.min(100, Number($("discountInput").value) || 0));
+      const discountAmt = serviceSubtotal * (discountPct / 100);
+      const afterDiscount = serviceSubtotal - discountAmt;
+
+      const vatPct = Number($("vatSelect").value) || 0;
+      const vatAmt = afterDiscount * (vatPct / 100);
+      const serviceTotal = afterDiscount + vatAmt;
+
+      // Part II: Media Budget
+      const selectedMedia = mediaItems.filter((m) => m.selected);
+      const mediaSubtotal = selectedMedia.reduce((sum, m) => sum + (Number(m.days) || 0) * (Number(m.dailyBudget) || 0), 0);
+      const mediaTaxPct = Number($("mediaTaxSelect").value) || 0;
+      const mediaTaxAmt = mediaSubtotal * (mediaTaxPct / 100);
+      const mediaTotal = mediaSubtotal + mediaTaxAmt;
+
+      const grandTotal = serviceTotal + mediaTotal;
+
+      // Update Part I & Part II table footers
+      $("serviceFootTotal").textContent = fmtMoney(serviceSubtotal);
+      $("mediaFootTotal").textContent = fmtMoney(mediaSubtotal);
+      updateMediaShares(mediaSubtotal);
+
+      // Update Summary Box
+      $("subtotalVal").textContent = fmtMoney(serviceSubtotal);
+      $("discountVal").textContent = discountAmt > 0 ? `- ${fmtMoney(discountAmt)}` : "0 ₫";
+      $("vatVal").textContent = vatAmt > 0 ? `+ ${fmtMoney(vatAmt)}` : "0 ₫";
+      $("serviceTotalVal").textContent = fmtMoney(serviceTotal);
+
+      $("mediaSubtotalLabel").textContent = `Dự toán Ngân sách Media (${selectedMedia.length} kênh)`;
+      $("mediaSubtotalVal").textContent = fmtMoney(mediaSubtotal);
+      $("mediaTaxVal").textContent = mediaTaxAmt > 0 ? `+ ${fmtMoney(mediaTaxAmt)}` : "0 ₫";
+      $("mediaTotalVal").textContent = fmtMoney(mediaTotal);
+
+      $("grandTotalVal").textContent = fmtMoney(grandTotal);
+      $("amountWords").textContent = numberToVietnameseWords(grandTotal);
+
+      // Milestones (50 / 30 / 20)
+      const m1 = Math.round(grandTotal * 0.5);
+      const m2 = Math.round(grandTotal * 0.3);
+      const m3 = Math.max(0, Math.round(grandTotal) - m1 - m2);
+      $("ms1Val").textContent = fmtMoney(m1);
+      $("ms2Val").textContent = fmtMoney(m2);
+      $("ms3Val").textContent = fmtMoney(m3);
+
+      $("selectedCountHint").textContent = `Đang tính ${selectedItems.length}/${items.length} hạng mục dịch vụ`;
+      $("mediaCountHint").textContent = `Đang phân bổ trên ${selectedMedia.length}/${mediaItems.length} nền tảng quảng cáo`;
+
+      // Combined Allocation Visual Bar (Media Budget + Service Categories)
+      const byCat = {};
+      if (mediaSubtotal > 0) {
+        byCat["Ngân sách Media"] = mediaSubtotal;
+      }
+      selectedItems.forEach((it) => {
+        const val = (Number(it.qty) || 0) * (Number(it.price) || 0);
+        byCat[it.category] = (byCat[it.category] || 0) + val;
+      });
+      const combinedBase = serviceSubtotal + mediaSubtotal;
+      const catEntries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+
+      if (!combinedBase || !catEntries.length) {
+        $("stackedBar").innerHTML = "";
+        $("allocList").innerHTML = `<div style="font-size:12.5px; color:var(--text-muted)">Chưa có hạng mục nào được chọn.</div>`;
+        return;
+      }
+
+      $("stackedBar").innerHTML = catEntries.map(([cat, val]) => {
+        const pct = (val / combinedBase) * 100;
+        const { color } = getCatStyle(cat);
+        return `<div class="stacked-seg" style="width:${pct.toFixed(2)}%; background:${color}" title="${escapeHtml(cat)}: ${pct.toFixed(1)}%"></div>`;
+      }).join("");
+
+      $("allocList").innerHTML = catEntries.map(([cat, val]) => {
+        const pct = ((val / combinedBase) * 100).toFixed(1).replace(".", ",");
+        const { color } = getCatStyle(cat);
+        const label = cat === "Ngân sách Media" ? `Ngân sách Media (${selectedMedia.length} nền tảng)` : cat;
+        return `
+          <div class="alloc-row">
+            <span class="alloc-left">
+              <span class="dot" style="background:${color}"></span>
+              <span>${escapeHtml(label)}</span>
+            </span>
+            <span class="alloc-right">${fmtMoney(val)} (${pct}%)</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // Table delegated events: Part I (Services)
+    $("itemsBody").addEventListener("change", (e) => {
+      const tr = e.target.closest("tr[data-id]");
+      if (!tr) return;
+      const item = items.find((x) => x.id === Number(tr.dataset.id));
+      if (!item) return;
+
+      if (e.target.dataset.action === "toggle") {
+        item.selected = e.target.checked;
+        renderItems();
+      }
+    });
+
+    $("itemsBody").addEventListener("input", (e) => {
+      const tr = e.target.closest("tr[data-id]");
+      if (!tr) return;
+      const item = items.find((x) => x.id === Number(tr.dataset.id));
+      if (!item) return;
+
+      const field = e.target.dataset.field;
+      if (!field) return;
+
+      if (field === "qty" || field === "price") {
+        item[field] = Math.max(0, Number(e.target.value) || 0);
+        const lineTotal = (Number(item.qty) || 0) * (Number(item.price) || 0);
+        tr.querySelector(".line-total").textContent = fmtMoney(lineTotal);
+        recalcTotals();
+      } else if (field === "unit") {
+        item.unit = e.target.value;
+      } else if (field === "name" || field === "desc") {
+        item[field] = e.target.textContent.trim();
+      }
+    });
+
+    $("itemsBody").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action='delete']");
+      if (!btn) return;
+      const tr = btn.closest("tr[data-id]");
+      items = items.filter((x) => x.id !== Number(tr.dataset.id));
+      renderItems();
+    });
+
+    // Table delegated events: Part II (Media Budget)
+    $("mediaBody").addEventListener("change", (e) => {
+      const tr = e.target.closest("tr[data-media-id]");
+      if (!tr) return;
+      const m = mediaItems.find((x) => x.id === Number(tr.dataset.mediaId));
+      if (!m) return;
+
+      if (e.target.dataset.action === "toggle") {
+        m.selected = e.target.checked;
+        renderMediaItems();
+      }
+    });
+
+    $("mediaBody").addEventListener("input", (e) => {
+      const tr = e.target.closest("tr[data-media-id]");
+      if (!tr) return;
+      const m = mediaItems.find((x) => x.id === Number(tr.dataset.mediaId));
+      if (!m) return;
+
+      const field = e.target.dataset.field;
+      if (!field) return;
+
+      if (field === "days" || field === "dailyBudget") {
+        m[field] = Math.max(0, Number(e.target.value) || 0);
+        const lineTotal = (Number(m.days) || 0) * (Number(m.dailyBudget) || 0);
+        tr.querySelector(".line-total").textContent = fmtMoney(lineTotal);
+        recalcTotals();
+      } else if (field === "name" || field === "desc") {
+        m[field] = e.target.textContent.trim();
+      }
+    });
+
+    $("mediaBody").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action='delete']");
+      if (!btn) return;
+      const tr = btn.closest("tr[data-media-id]");
+      mediaItems = mediaItems.filter((x) => x.id !== Number(tr.dataset.mediaId));
+      renderMediaItems();
+    });
+
+    // Discount & VAT controls
+    $("discountInput").addEventListener("input", recalcTotals);
+    $("vatSelect").addEventListener("change", recalcTotals);
+    $("mediaTaxSelect").addEventListener("change", recalcTotals);
+
+    // Add item (Part I)
+    $("addItemBtn").addEventListener("click", () => {
+      items.push({
+        id: nextId++,
+        selected: true,
+        optional: false,
+        category: "Tùy chọn Mở rộng",
+        name: "Hạng mục dịch vụ mới",
+        desc: "Nhập mô tả chi tiết phạm vi công việc và đầu ra bàn giao...",
+        unit: "Gói",
+        qty: 1,
+        price: 5000000
+      });
+      renderItems();
+    });
+
+    // Add media channel (Part II)
+    $("addMediaBtn").addEventListener("click", () => {
+      mediaItems.push({
+        id: nextId++,
+        selected: true,
+        platform: "Nền tảng khác",
+        name: "YouTube / Google Display — Phủ nhận diện thương hiệu",
+        desc: "Nhập mục tiêu phân bổ ngân sách, tệp đối tượng và khu vực chạy quảng cáo...",
+        days: 30,
+        dailyBudget: 1000000
+      });
+      renderMediaItems();
+    });
+
+    // Reset sample
+    $("resetBtn").addEventListener("click", () => {
+      items = structuredClone(DEFAULT_ITEMS);
+      mediaItems = structuredClone(DEFAULT_MEDIA_ITEMS);
+      $("discountInput").value = 5;
+      $("vatSelect").value = "8";
+      $("mediaTaxSelect").value = "0";
+      renderItems();
+      renderMediaItems();
+    });
+
+    // Mode switch
+    $("modeSwitch").querySelectorAll("button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        $("modeSwitch").querySelectorAll("button").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        const isPreview = btn.dataset.mode === "preview";
+        document.body.classList.toggle("preview-mode", isPreview);
+        document.querySelectorAll("[contenteditable]").forEach((el) => {
+          el.setAttribute("contenteditable", isPreview ? "false" : "true");
+        });
+      });
+    });
+
+    // CSV Export (exports both Service & Media rows)
+    function csvEscape(v) {
+      const s = String(v ?? "");
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }
+
+    $("exportCsvBtn").addEventListener("click", () => {
+      const header = "section,selected,optional,category,name,desc,unit,qty,price_vnd,total_vnd";
+      const serviceLines = items.map((i) => [
+        "service",
+        i.selected ? 1 : 0,
+        i.optional ? 1 : 0,
+        csvEscape(i.category),
+        csvEscape(i.name),
+        csvEscape(i.desc),
+        csvEscape(i.unit),
+        i.qty,
+        i.price,
+        (Number(i.qty) || 0) * (Number(i.price) || 0)
+      ].join(","));
+      const mediaLines = mediaItems.map((m) => [
+        "media",
+        m.selected ? 1 : 0,
+        0,
+        csvEscape(m.platform),
+        csvEscape(m.name),
+        csvEscape(m.desc),
+        "Ngày",
+        m.days,
+        m.dailyBudget,
+        (Number(m.days) || 0) * (Number(m.dailyBudget) || 0)
+      ].join(","));
+      const blob = new Blob(["\uFEFF" + [header, ...serviceLines, ...mediaLines].join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "bao_gia_hang_muc_va_media.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // CSV Import (supports both combined & legacy service-only CSV)
+    function parseCsv(text) {
+      const clean = text.replace(/^\uFEFF/, "").trim();
+      const rows = [];
+      let row = [], field = "", inQuotes = false;
+      for (let i = 0; i < clean.length; i++) {
+        const ch = clean[i], next = clean[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') { field += '"'; i++; }
+          else if (ch === '"') inQuotes = false;
+          else field += ch;
+        } else {
+          if (ch === '"') inQuotes = true;
+          else if (ch === ",") { row.push(field.trim()); field = ""; }
+          else if (ch === "\n") { row.push(field.trim()); rows.push(row); row = []; field = ""; }
+          else if (ch !== "\r") field += ch;
+        }
+      }
+      if (field.length || row.length) { row.push(field.trim()); rows.push(row); }
+      if (rows.length < 2) return { services: [], media: [] };
+      const headers = rows[0].map((h) => h.trim().toLowerCase());
+      const services = [], media = [];
+      rows.slice(1).filter((r) => r.some(Boolean)).forEach((r) => {
+        const obj = {};
+        headers.forEach((h, idx) => { obj[h] = r[idx] ?? ""; });
+        const selected = obj.selected === undefined ? true : obj.selected !== "0" && obj.selected.toLowerCase() !== "false";
+        if ((obj.section || "").toLowerCase() === "media") {
+          media.push({
+            id: nextId++,
+            selected,
+            platform: obj.category || obj.platform || "Nền tảng khác",
+            name: obj.name || "Kênh quảng cáo Media",
+            desc: obj.desc || "",
+            days: Number(obj.qty || obj.days) || 30,
+            dailyBudget: Number(obj.price_vnd || obj.price || obj.daily_budget) || 0
+          });
+        } else {
+          services.push({
+            id: nextId++,
+            selected,
+            optional: obj.optional === "1" || (obj.optional || "").toLowerCase() === "true",
+            category: obj.category || "Tùy chọn Mở rộng",
+            name: obj.name || "Hạng mục dịch vụ",
+            desc: obj.desc || "",
+            unit: obj.unit || "Gói",
+            qty: Number(obj.qty) || 1,
+            price: Number(obj.price_vnd || obj.price) || 0
+          });
+        }
+      });
+      return { services, media };
+    }
+
+    $("importCsvBtn").addEventListener("click", () => $("csvImportInput").click());
+    $("csvImportInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const parsed = parseCsv(ev.target.result);
+        if (!parsed.services.length && !parsed.media.length) {
+          alert("Không đọc được hạng mục nào từ file CSV.");
+          return;
+        }
+        if (parsed.services.length) items = parsed.services;
+        if (parsed.media.length) mediaItems = parsed.media;
+        renderItems();
+        renderMediaItems();
+      };
+      reader.readAsText(file, "UTF-8");
+      e.target.value = "";
+    });
+
+    // Initial render
+    renderItems();
+    renderMediaItems();
+  </script>
+</body>
+</html>
